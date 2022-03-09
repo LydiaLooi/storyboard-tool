@@ -88,6 +88,7 @@ def main():
 
     map = setup(FILEPATH, MAPNAME, DIFF)
     
+    map.print_map()
     
 
 

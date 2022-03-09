@@ -1,5 +1,7 @@
 from typing import List
 
+from constants import COL1, COL2, COL3, COL4
+
 class Path:
     def __init__(self):
         pass
@@ -11,6 +13,19 @@ class Note:
         self._tail_time: int = tail_time
         self._column_number: int = column_number
         self._path: Path = path
+
+    @property
+    def column_index(self):
+        if self._column_number == COL1:
+            return 0
+        elif self._column_number == COL2:
+            return 1
+        elif self._column_number == COL3:
+            return 2
+        elif self._column_number == COL4:
+            return 3
+        else:
+            raise Exception("Weird column number? {}".format(self._column_number))
 
     def set_tail_time(self, time: int):
         self._tail_time = time
@@ -103,3 +118,39 @@ class Map:
             note.set_tail_time(tail)
 
         self.add_note(note)
+
+
+    def print_map(self):
+        gap = 200
+
+        working_row = [" "," "," "," "]
+        working_time = None
+
+        time_since_last_row = 0
+
+        for i in range(len(self.notes) - 1, -1, -1):
+            # print(self.notes[i])
+            note = self.notes[i]
+
+            if working_time is not None and working_time != note._hit_time:
+                # print(working_row)
+                s = ""
+                for i in working_row:
+                    s += i
+                print(s)
+                working_row = [" "," "," "," "]
+                time_since_last_row = note._hit_time - working_time
+
+                gaps = time_since_last_row % gap
+                for i in range(gaps):
+                    print()
+
+            if working_time != note._hit_time:
+                working_time = note._hit_time
+            
+            if note._tail_time:
+                working_row[note.column_index] = "□"
+            else:
+                working_row[note.column_index] = "■"
+
+            
