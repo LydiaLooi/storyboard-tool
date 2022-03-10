@@ -1,43 +1,10 @@
-from collections import namedtuple
+from copy import deepcopy
 from typing import List
-from constants import COL1, COL2, COL3, COL4, SPRITE_FILE
+from constants import *
 from storyboard_functions import *
+from path import Path
 
 
-Coord = namedtuple("Coord", "x y")
-
-MAGIC = 13720 # Literal magic number
-RAW_SCROLL = 20
-SCROLL = 480 / (MAGIC / RAW_SCROLL)
-
-
-
-class Path():
-    def __init__(self, lane_index: int):
-        self.start_coords: List["Coord"] = [
-            Coord(410, -1000), 
-            Coord(440, -1000), 
-            Coord(470, -1000), 
-            Coord(500, -1000)]
-        self.end_coords: List["Coord"] = [
-            Coord(410, 400), 
-            Coord(440, 400), 
-            Coord(470, 400), 
-            Coord(500, 400)]
-        self.lane_index = lane_index
-
-    @property
-    def start_time_diff(self):
-        # How early should the note spawn before when it hits the receptors
-        return int(abs(self.start_coords[self.lane_index].y - self.end_coords[self.lane_index].y) / SCROLL)
-
-    @property
-    def start(self) -> Coord:
-        return self.start_coords[self.lane_index]
-
-    @property
-    def end(self) -> Coord:
-        return self.end_coords[self.lane_index]
 
 
 class Note:
@@ -67,15 +34,16 @@ class Note:
             write_sprite_header(outfile, SPRITE_FILE)
             write_move(
                 outfile, 
-                self._hit_time - self._path.start_time_diff, 
+                self._hit_time - self._path.get_start_time_diff(self), 
                 self._hit_time, 
-                self._path.start.x, self._path.start.y, 
-                self._path.end.x, self._path.end.y)
+                self._path.get_start(self.column_index).x, self._path.get_start(self.column_index).y, 
+                self._path.get_end(self.column_index).x, self._path.get_end(self.column_index).y)
             write_vector_scale(
                 outfile, 
-                self._hit_time - self._path.start_time_diff, 
+                self._hit_time - self._path.get_start_time_diff(self), 
                 self._hit_time, 
                 30, 10)
+
 
     def __str__(self):
         return f"{self._hit_time}, {self._column_number}, {self._tail_time}"
@@ -103,7 +71,7 @@ class Map:
 
     def add_note(self, note: Note, path: Path=None):
         if path is None:
-            path = Path(note.column_index)
+            path = Path()
         note._path = path
         self._notes.append(note)
 
@@ -138,24 +106,20 @@ class Map:
         return note_lines
 
     def process_notes(self):
+
+        customPath = Path()
+
         for line in self.note_lines:
-            self.process_line(line)
+            self.process_line(line, customPath)
+            customPath = deepcopy(customPath)
+            customPath.end_coords[0].x -= 10
+            customPath.end_coords[1].x -= 10
+            customPath.end_coords[2].x -= 10
+            customPath.end_coords[3].x -= 10
 
 
-    def process_line(self, line):
-        """
-        Processes the given hitobject line and parses it to be added to the note_rows
-        list.
-        
-        The following tuple is what is added to the note_rows list:
-        (start, hit_time, column, note, length)
-        
-        start:    Start time of when the note should spawn in
-        hit_time: Hit time of when the note should disappear.
-        column:   The x-position that the note should be at
-        note:     The file name of the note sprite to be used
-        length:   The length of the note in milliseconds or None if it's a rice note
-        """
+    def process_line(self, line, customPath: Path = None):
+
         col, _, hit_time, _, _, extra = line.split(",")
         hit_time = int(hit_time)
         col = int(col)
@@ -167,7 +131,10 @@ class Map:
             tail = int(extra[0])
             note.set_tail_time(tail)
 
-        self.add_note(note)
+        if customPath:
+            self.add_note(note, customPath)
+        else:
+            self.add_note(note)
 
 
     def print_map(self):
