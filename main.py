@@ -1,5 +1,5 @@
 from constants import *
-from mania_utils import Map, Note, Path
+from mania_utils import Map
 import sys
 import configparser
 
@@ -9,55 +9,6 @@ DIFF = config["Map"]["Difficulty"]
 FILEPATH = config["Map"]["Filepath"]
 MAPNAME = config["Map"]["Mapname"]
 
-
-
-def process_notes(note_rows):
-    """
-    Takes the list of tuples of note data and processes it into a dictionary of
-    processed notes.
-    
-    Will check for 'purple notes'
-    
-    Key: Integer of the millisecond time
-    Value: List of tuples with information of each note
-    
-    (start, end, col, note, length)
-    start:    Start time of when the note should spawn in
-    end:      End time of when the note should disappear. (The hit-time)
-    col:      The x-position that the note should be at
-    note:     The file name of the note sprite to be used
-    length:   The length of the note in milliseconds or None if it's a rice note
-    
-    """
-    processed_notes = {}
-    for time in note_rows:
-        if time not in processed_notes:
-            processed_notes[time] = []
-
-        if len(note_rows[time]) == 1: # There is only one note at the particular time there is no need to check for purple notes
-            start, end, col, note, length = note_rows[time][0]
-            if length == None:
-                processed_notes[time] = note_rows[time]
-            else:
-                processed_notes[time].append((start, end, col, note, length)) # head
-
-        else:
-            for note in note_rows[time]:
-                start, end, col, note_file, length = note
-                                
-                
-                # if should_be_purple(note, note_rows[time]) and note not in processed_notes[time]:
-                #     if (not already_exists_as_purple(note, processed_notes[time])):
-                #         processed_notes[time].append((start, end, col, NOTE_P, length))
-                # else:
-                #     if length == None:
-                #         if (start, end, col, NOTE_P, length) not in processed_notes[time]:
-                #             processed_notes[time].append((start, end, col, note_file, length))
-                #     else:
-                #         processed_notes[time].append((start, end, col, note_file, length))     
-
-
-    return processed_notes
 
 def print_banner(message):
     """
@@ -88,8 +39,16 @@ def main():
 
     map = setup(FILEPATH, MAPNAME, DIFF)
     
-    map.print_map()
+    outfile = open(f"{FILEPATH}{MAPNAME}.osb", 'w')
     
+    outfile.write(HEADER)
+    map.write_map(outfile)
+    outfile.write(FOOTER)
+
+    outfile.close()
+    # map.print_map()
+    
+    print()
 
 
     # try:

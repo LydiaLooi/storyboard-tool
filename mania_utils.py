@@ -1,10 +1,43 @@
+from collections import namedtuple
 from typing import List
+from constants import COL1, COL2, COL3, COL4, SPRITE_FILE
+from storyboard_functions import *
 
-from constants import COL1, COL2, COL3, COL4
 
-class Path:
-    def __init__(self):
-        pass
+Coord = namedtuple("Coord", "x y")
+
+MAGIC = 13720 # Literal magic number
+RAW_SCROLL = 20
+SCROLL = 480 / (MAGIC / RAW_SCROLL)
+
+
+
+class Path():
+    def __init__(self, lane_index: int):
+        self.start_coords: List["Coord"] = [
+            Coord(410, -1000), 
+            Coord(440, -1000), 
+            Coord(470, -1000), 
+            Coord(500, -1000)]
+        self.end_coords: List["Coord"] = [
+            Coord(410, 400), 
+            Coord(440, 400), 
+            Coord(470, 400), 
+            Coord(500, 400)]
+        self.lane_index = lane_index
+
+    @property
+    def start_time_diff(self):
+        # How early should the note spawn before when it hits the receptors
+        return int(abs(self.start_coords[self.lane_index].y - self.end_coords[self.lane_index].y) / SCROLL)
+
+    @property
+    def start(self) -> Coord:
+        return self.start_coords[self.lane_index]
+
+    @property
+    def end(self) -> Coord:
+        return self.end_coords[self.lane_index]
 
 
 class Note:
@@ -30,6 +63,20 @@ class Note:
     def set_tail_time(self, time: int):
         self._tail_time = time
 
+    def write_path(self, outfile):
+            write_sprite_header(outfile, SPRITE_FILE)
+            write_move(
+                outfile, 
+                self._hit_time - self._path.start_time_diff, 
+                self._hit_time, 
+                self._path.start.x, self._path.start.y, 
+                self._path.end.x, self._path.end.y)
+            write_vector_scale(
+                outfile, 
+                self._hit_time - self._path.start_time_diff, 
+                self._hit_time, 
+                30, 10)
+
     def __str__(self):
         return f"{self._hit_time}, {self._column_number}, {self._tail_time}"
     
@@ -54,7 +101,10 @@ class Map:
     def filename(self):
         return f"{self._file_path}{self._map_name} [{self._difficulty_name}].osu"
 
-    def add_note(self, note: Note):
+    def add_note(self, note: Note, path: Path=None):
+        if path is None:
+            path = Path(note.column_index)
+        note._path = path
         self._notes.append(note)
 
     @property
@@ -141,7 +191,8 @@ class Map:
                 working_row = [" "," "," "," "]
                 time_since_last_row = note._hit_time - working_time
 
-                gaps = time_since_last_row % gap
+                gaps = abs(time_since_last_row // gap)
+                # print(f"{time_since_last_row}, {time_since_last_row % gap}, {gaps}")
                 for i in range(gaps):
                     print()
 
@@ -153,4 +204,6 @@ class Map:
             else:
                 working_row[note.column_index] = "■"
 
-            
+    def write_map(self, outfile):
+        for note in self.notes:
+            note.write_path(outfile)

@@ -40,8 +40,12 @@ def write_vertical_scale(outfile, startTime, endTime, startScale, endScale, easi
     outfile.write(f' V,{easing},{startTime},{endTime},{startScale},{endScale}\n')    
 
 
-def write_vector_scale(outfile, startTime, endTime, startScaleX, startScaleY, endScaleX, endScaleY, easing=0):
+def write_vector_scale(outfile, startTime, endTime, startScaleX, startScaleY, endScaleX=None, endScaleY=None, easing=0):
     """
     Write the line to vector scale a sprite
     """
-    outfile.write(f' V,{easing}, {startTime}, {endTime}, {startScaleX}, {startScaleY}, {endScaleX}, {endScaleY}')
+    if endScaleX is None:
+        endScaleX = startScaleX
+    if endScaleY is None:
+        endScaleY = startScaleY
+    outfile.write(f' V,{easing},{startTime},{endTime},{startScaleX},{startScaleY}, {endScaleX}, {endScaleY}\n')
