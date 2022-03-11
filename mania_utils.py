@@ -16,6 +16,7 @@ class Note:
         self._path: Path = path
         self._effects: List["Effect"] = [DefaultNoteEffect()]
 
+
     @property
     def column_index(self):
         if self._column_number == COL1:
@@ -29,14 +30,43 @@ class Note:
         else:
             raise Exception("Weird column number? {}".format(self._column_number))
 
+    def get_note_length(self):
+        if self._tail_time is None:
+            raise Exception("Not an LN btw")
+        return self._tail_time - self._hit_time
+
     def set_tail_time(self, time: int):
         self._tail_time = time
 
     def add_effect(self, effect: Effect):
         self._effects.append(effect)
 
+    def write_ln(self, outfile):
+        ln_scale = (abs(self._path.get_spawn_buffer(self) - self._path.get_hit_pos(self)) / self._path.get_start_time_diff(self)) # pixels per milisecond
+        scale = self.get_note_length() * ln_scale
+        
+        write_sprite_header(outfile, SPRITE_FILE, origin="BottomCentre")
+
+        write_vector_scale(
+            outfile, 
+            self._hit_time,
+            self._hit_time + self.get_note_length(),
+            NOTE_WIDTH, scale,
+            NOTE_WIDTH, 0)
+
+
+        write_move(
+            outfile, 
+            self._hit_time - self._path.get_start_time_diff(self), 
+            self._hit_time, 
+            self._path.get_start(self.column_index).x, self._path.get_start(self.column_index).y, 
+            self._path.get_end(self.column_index).x, self._path.get_end(self.column_index).y)
+
+
+
     def write_note(self, outfile):
             write_sprite_header(outfile, SPRITE_FILE, origin="BottomCentre")
+            
             write_move(
                 outfile, 
                 self._hit_time - self._path.get_start_time_diff(self), 
@@ -46,6 +76,10 @@ class Note:
             # Write effects e.g., fade in, fade out, flash light...
             for e in self._effects:
                 e.write_effect(outfile, self)
+
+            if self._tail_time is not None:
+                self.write_ln(outfile)
+
             self._path.update_path()
 
 
