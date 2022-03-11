@@ -3,6 +3,7 @@ from typing import List
 from constants import *
 from storyboard_functions import *
 from path import Path
+from effect import DefaultNoteEffect, Effect, ScaleOutEffect
 
 
 
@@ -13,6 +14,7 @@ class Note:
         self._tail_time: int = tail_time
         self._column_number: int = column_number
         self._path: Path = path
+        self._effects: List["Effect"] = [DefaultNoteEffect()]
 
     @property
     def column_index(self):
@@ -30,19 +32,21 @@ class Note:
     def set_tail_time(self, time: int):
         self._tail_time = time
 
-    def write_path(self, outfile):
-            write_sprite_header(outfile, SPRITE_FILE)
+    def add_effect(self, effect: Effect):
+        self._effects.append(effect)
+
+    def write_note(self, outfile):
+            write_sprite_header(outfile, SPRITE_FILE, origin="BottomCentre")
             write_move(
                 outfile, 
                 self._hit_time - self._path.get_start_time_diff(self), 
                 self._hit_time, 
                 self._path.get_start(self.column_index).x, self._path.get_start(self.column_index).y, 
                 self._path.get_end(self.column_index).x, self._path.get_end(self.column_index).y)
-            write_vector_scale(
-                outfile, 
-                self._hit_time - self._path.get_start_time_diff(self), 
-                self._hit_time, 
-                30, 10)
+            # Write effects e.g., fade in, fade out, flash light...
+            for e in self._effects:
+                e.write_effect(outfile, self)
+            self._path.update_path()
 
 
     def __str__(self):
@@ -111,11 +115,6 @@ class Map:
 
         for line in self.note_lines:
             self.process_line(line, customPath)
-            customPath = deepcopy(customPath)
-            customPath.end_coords[0].x -= 10
-            customPath.end_coords[1].x -= 10
-            customPath.end_coords[2].x -= 10
-            customPath.end_coords[3].x -= 10
 
 
     def process_line(self, line, customPath: Path = None):
@@ -126,6 +125,8 @@ class Map:
         extra = extra.split(":")
 
         note: Note = Note(hit_time, col)
+
+        note.add_effect(ScaleOutEffect())
 
         if len(extra) > 5: # If is LN, else.
             tail = int(extra[0])
@@ -173,4 +174,4 @@ class Map:
 
     def write_map(self, outfile):
         for note in self.notes:
-            note.write_path(outfile)
+            note.write_note(outfile)

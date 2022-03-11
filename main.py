@@ -39,7 +39,7 @@ def main():
 
     map = setup(FILEPATH, MAPNAME, DIFF)
     
-    outfile = open(f"{FILEPATH}{MAPNAME}.osb", 'w')
+    outfile = open(f"{OUTPUT_DIR}{MAPNAME}.osb", 'w')
     
     outfile.write(HEADER)
     map.write_map(outfile)

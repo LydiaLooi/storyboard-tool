@@ -2,11 +2,11 @@
 https://osu.ppy.sh/wiki/en/Storyboard/Scripting/Commands
 """
 
-def write_sprite_header(outfile, sprite):
+def write_sprite_header(outfile, sprite, origin="Centre"):
     """
     Writes the header line to declare a sprite
     """    
-    outfile.write(f'Sprite,Foreground,Centre,"{sprite}",320,240\n')
+    outfile.write(f'Sprite,Foreground,{origin},"{sprite}",320,240\n')
 
 def write_fade(outfile, startTime, endTime, startFade, endFade, easing=0):
     """

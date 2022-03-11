@@ -10,15 +10,15 @@ class Coord():
 class Path():
     def __init__(self):
         self.start_coords: List["Coord"] = [
-            Coord(410, -1000), 
-            Coord(440, -1000), 
-            Coord(470, -1000), 
-            Coord(500, -1000)]
+            Coord(260, -1000), 
+            Coord(300, -1000), 
+            Coord(340, -1000), 
+            Coord(380, -1000)]
         self.end_coords: List["Coord"] = [
-            Coord(410, 400), 
-            Coord(440, 400), 
-            Coord(470, 400), 
-            Coord(500, 400)]
+            Coord(260, 400), 
+            Coord(300, 400), 
+            Coord(340, 400), 
+            Coord(380, 400)]
 
     def get_start_time_diff(self, note):
         # How early should the note spawn before when it hits the receptors
@@ -30,3 +30,8 @@ class Path():
 
     def get_end(self, lane_index: int) -> Coord:
         return self.end_coords[lane_index]
+
+    def update_path(self):
+        # Default path does nothing
+        pass
+
