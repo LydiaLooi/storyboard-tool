@@ -2,8 +2,8 @@ from copy import deepcopy
 from typing import List
 from constants import *
 from storyboard_functions import *
-from path import Path
-from effect import DefaultNoteEffect, Effect, ScaleOutEffect
+from paths import Path
+from effects import DefaultNoteEffect, Effect, FadeInEffect, HiddenEffect, ScaleOutEffect
 
 
 
@@ -14,7 +14,7 @@ class Note:
         self._tail_time: int = tail_time
         self._column_number: int = column_number
         self._path: Path = path
-        self._effects: List["Effect"] = [DefaultNoteEffect()]
+        self._effects: List["Effect"] = [DefaultNoteEffect(), ScaleOutEffect()]
 
 
     @property
@@ -159,8 +159,6 @@ class Map:
         extra = extra.split(":")
 
         note: Note = Note(hit_time, col)
-
-        note.add_effect(ScaleOutEffect())
 
         if len(extra) > 5: # If is LN, else.
             tail = int(extra[0])

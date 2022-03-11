@@ -41,30 +41,14 @@ def main():
     
     outfile = open(f"{OUTPUT_DIR}{MAPNAME}.osb", 'w')
     
-    outfile.write(HEADER)
-    map.write_map(outfile)
-    outfile.write(FOOTER)
-
-    outfile.close()
-    # map.print_map()
+    try:
+        outfile.write(HEADER)
+        map.write_map(outfile)
+        outfile.write(FOOTER)
+        outfile.close()
+    except Exception as e:
+        print_banner("An error has occured...\n" + str(e))
     
-    print()
-
-
-    # try:
-    #     processed_notes = process_notes(map)
-    #     # print(processed_notes)
-    # except Exception as error:
-    #     print_banner("An error has occured...\n" + str(error))
-    #     print("Conversion stopped. osb file not written.")
-    #     input("\nPress enter to exit...")
-    #     sys.exit()
-    # write_osb_file(processed_notes, OUTPUT)
-
-    # print_note_stats(note_rows)
-
-    # print_banner(f"'{OUTPUT}' file written!")
-    # print_finished_info()
     input("\nPress enter to exit...")
 
 if __name__ == "__main__":

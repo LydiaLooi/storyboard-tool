@@ -13,6 +13,7 @@ RAW_SCROLL = 20
 SCROLL = 480 / (MAGIC / RAW_SCROLL)
 
 OUTPUT_DIR = "C:/Users/itsly/AppData/Local/osu!/Songs/581065 Kano - paranoia/"
+# OUTPUT_DIR = "C:/Users/itsly/AppData/Local/osu!/Songs/Rogue_-_Fortress/"
 
 NOTE_WIDTH = 35
 NOTE_HEIGHT = 15

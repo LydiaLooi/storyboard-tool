@@ -2,6 +2,12 @@
 https://osu.ppy.sh/wiki/en/Storyboard/Scripting/Commands
 """
 
+class RGB:
+    def __init__(self, r, g, b):
+        self.r = r
+        self.g = g
+        self.b = b
+
 def write_sprite_header(outfile, sprite, origin="Centre"):
     """
     Writes the header line to declare a sprite
@@ -40,12 +46,12 @@ def write_vertical_scale(outfile, startTime, endTime, startScale, endScale, easi
     outfile.write(f' V,{easing},{startTime},{endTime},{startScale},{endScale}\n')    
 
 
-def write_vector_scale(outfile, startTime, endTime, startScaleX, startScaleY, endScaleX=None, endScaleY=None, easing=0):
+def write_vector_scale(outfile, startTime, endTime, startScaleX, startScaleY, endScaleX, endScaleY, easing=0):
     """
     Write the line to vector scale a sprite
     """
-    if endScaleX is None:
-        endScaleX = startScaleX
-    if endScaleY is None:
-        endScaleY = startScaleY
-    outfile.write(f' V,{easing},{startTime},{endTime},{startScaleX},{startScaleY}, {endScaleX}, {endScaleY}\n')
+    outfile.write(f' V,{easing},{startTime},{endTime},{startScaleX},{startScaleY},{endScaleX},{endScaleY}\n')
+
+def write_colour(outfile, startTime, endTime, start: RGB, end: RGB, easing=0):
+    """The virtual light source colour on the object. The colours of the pixels on the object are determined subtractively."""
+    outfile.write(f' C,{easing},{startTime},{endTime},{start.r},{start.g},{start.b},{end.r},{end.g},{end.b}')
